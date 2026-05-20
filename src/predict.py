@@ -91,10 +91,10 @@ def load_models(device):
     models = {}
     classifiers = {}
 
-    TOKENIZER_PATHS = {
-        "deberta": "/opt/hf_cache/deberta",
-        "roberta": "/opt/hf_cache/roberta",
-        "sentbert": "/opt/hf_cache/sentbert",
+    TOKENIZER_NAMES = {
+        "deberta": "cross-encoder/nli-deberta-v3-base",
+        "roberta": "sentence-transformers/all-roberta-large-v1",
+        "sentbert": "sentence-transformers/all-mpnet-base-v2",
     }
 
     for enc_name in sorted(ENCODERS.keys()):
@@ -109,24 +109,18 @@ def load_models(device):
             )
             sys.exit(1)
 
-        tok_dir = TOKENIZER_PATHS[enc_name]
-
-        if not os.path.exists(tok_dir):
-            logger.error(
-                f"Tokenizer directory not found: {tok_dir}"
-            )
-            sys.exit(1)
-
         logger.info(f"  Loading encoder: {enc_name}")
 
         models[enc_name] = {
             "encoder": AutoModel.from_pretrained(
-                enc_dir
+                enc_dir,
+                local_files_only=True,
             ).to(device).eval(),
 
             "tokenizer": AutoTokenizer.from_pretrained(
-                tok_dir,
-                local_files_only=True,
+                TOKENIZER_NAMES[enc_name],
+                use_fast=False,
+		local_files_only=True,
             ),
         }
 
@@ -228,6 +222,7 @@ def load_models(device):
         ens_config = json.load(f)
 
     return models, classifiers, bilstm, ens_config
+
 
 # ── inference ─────────────────────────────────────────────────────────────────
 
@@ -538,4 +533,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

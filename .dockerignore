@@ -1,0 +1,13 @@
+checkpoints/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+test_output/
+tira-output/
+
+.git/
+.gitignore
+
+.cache/
